@@ -1,0 +1,10 @@
+= Forter
+
+  Forte is an esoteric programming language created by ais523 in 2006, based
+  around redefinition of constants. Its syntax is similar to BASIC (a
+  non-esoteric language). It is called Forte due to the mess it makes of the
+  Peano postulates.
+  
+1. Read http://esolangs.org/wiki/Forte
+2. Read that again, since you probably don't understand it yet (I didn't)
+3. Run bin/forter myscript.fo

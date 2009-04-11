@@ -1,0 +1,128 @@
+grammar Forter
+  rule script
+    (commands newline)+ {
+      def evaluator
+        elements.inject(Forter::Evaluator.new) do |e, i|
+          i.commands.evaluate(e)
+          e
+        end
+      end
+    }
+  end
+  
+  rule commands
+    line:number command more_commands:(':' command)* {
+      def commands
+        [command] + more_commands.elements.map { |i| i.command }
+      end
+      
+      def evaluate(e)
+        e.add_line(line.evaluate(e), *commands)
+      end
+    }
+  end
+  
+  rule command
+    let / print / input / get / put / rem / kend
+  end
+  
+  rule let
+    'LET' first:expression '=' second:expression {
+      def evaluate(e)
+        first.evaluate(e).redefine(second.evaluate(e))
+      end
+    }
+  end
+  
+  rule print
+    'PRINT' thing:(string / expression) newline:(';'?) {
+      def evaluate(e)
+        meth = newline.text_value.empty? ? :puts : :print
+        send(meth, thing.evaluate(e))
+      end
+    }
+  end
+  
+  rule input
+    'INPUT' expression {
+      def evaluate(e)
+        num = $stdin.gets.to_i
+        expression.evaluate(e).redefine(e.value(num))
+      end
+    }
+  end
+  
+  rule get
+    'GET' expression {
+      def evaluate(e)
+        num = $stdin.getc || 256
+        expression.evaluate(e).redefine(e.value(num))
+      end
+    }
+  end
+  
+  rule put
+    'PUT' expression {
+      def evaluate(e)
+        print expression.evaluate(e).chr
+      end
+    }
+  end
+  
+  rule rem
+    'REM' [^\n]* {
+      def evaluate(e)
+      end
+    }
+  end
+  
+  rule kend
+    'END' {
+      def evaluate(e)
+        e.end = true
+      end
+    }
+  end
+  
+  rule expression
+    first:pexpression thing:('+' / '-' / '*' / '/') second:pexpression {
+      def evaluate(e)
+        f = first.evaluate(e)
+        s = second.evaluate(e)
+        e.value(f.send(thing.text_value, s))
+      end
+    }
+    /
+    pexpression
+  end
+  
+  rule pexpression
+    '(' expression ')' {
+      def evaluate(e)
+        expression.evaluate(e)
+      end
+    }
+    /
+    number
+  end
+  
+  rule string
+    '"' content:[^"]* '"' {
+      def evaluate(e)
+        content.text_value
+      end
+    }
+  end
+  
+  rule newline
+    "\n"
+  end
+  
+  rule number
+    [0-9]+ {
+      def evaluate(e)
+        e.value(text_value.to_i)
+      end
+    }
+  end
+end
