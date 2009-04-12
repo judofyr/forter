@@ -40,6 +40,7 @@ end
 module Forter
   class Value < SimpleDelegator
     def redefine(value)
+      return self if value == self
       if __getobj__.is_a?(Value)
         __getobj__.redefine(value)
       else
