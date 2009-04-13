@@ -91,7 +91,6 @@ class RDParser
        match = Match.new(pattern, block)
        if pattern[0] == @name
          pattern.shift
-         puts "YAY"
          @lrmatches << match
        else
          @matches << match
@@ -115,10 +114,6 @@ class RDParser
        start = @parser.pos
        matches.each do |match|
          r = pre_result ? [pre_result] : []
-         
-         if match.pattern.empty? && @parser.end?
-           return true
-         end
          
          match.pattern.each do |token|
            if @parser.rules[token]
