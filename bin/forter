@@ -1,15 +1,12 @@
 #!/usr/bin/env ruby
-require File.join(File.dirname(__FILE__), '..', 'lib', 'forter')
+require_relative '../lib/forter'
 require 'optparse'
 
 ARGV << '-h' if ARGV.empty?
-clean = false
 
 parser = OptionParser.new do |opts|
-  opts.on('-c', 'Clean only') { clean = true }
   opts.on('-h', '--help') {
     puts "Usage: forter script.fo"
-    puts "       forter -c script.fo > clean-script.fo"
     exit
   }
 end
@@ -21,11 +18,15 @@ rescue OptionParser::InvalidOption
   exit
 end
 
-forter = ForterParser.new
-content = File.read(files[0])
-
-if clean
-  puts forter.cleanup(content)
+evaluator = Forter::Evaluator.new
+input = File.read(files[0])
+begin
+  evaluator.load_script(input)
+rescue Forter::ParseError => err
+  $stderr.puts "ParseError: #{err}"
+  $stderr.puts err.report_on(input)
+  exit 1
 else
-  forter.parse!(content).evaluator.run!
+  evaluator.run
 end
+
