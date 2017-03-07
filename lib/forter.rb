@@ -176,15 +176,11 @@ module Forter
     def evaluate(expr)
       case expr
       when Integer
-        if @numbers.has_key?(expr)
-          next_expr = @numbers[expr]
-          if next_expr == expr
-            expr
-          else
-            @numbers[expr] = evaluate(next_expr)
-          end
-        else
+        next_expr = @numbers[expr]
+        if next_expr == expr
           expr
+        else
+          @numbers[expr] = evaluate(next_expr)
         end
       when Array
         op, left, right = expr
